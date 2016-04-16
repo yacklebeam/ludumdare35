@@ -1,0 +1,16 @@
+weapons:
+  - kitchen knife
+  - candlestick
+  - laptop
+rooms:
+  - dining room
+  - kitchen
+  - living room
+  - study
+  - water closet
+# people: 
+# procedurally generate
+
+# need to be enough "cards" for each player to get one of each
+# duplicate cards if needed
+
