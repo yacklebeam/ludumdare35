@@ -186,7 +186,7 @@
                         GameState.curRoom += GameState.possibleDoors[j][2];
                         CharacterSet.positions[0] = [newX, newY];
                         Ctrl.dest = [newX, newY];
-                        CharacterSet.sprites[0][4] = GameState.curRoom;
+                        CharacterSet.cRooms[0] = GameState.curRoom;
                         break;
                     }
                 }
@@ -208,6 +208,7 @@
         cCount : 20,
         sprites : [],
         positions: [],
+        cRooms: [],
         selectedChar : 0,
 
         init: function()
@@ -224,18 +225,19 @@
                 var shirt = getRand(0,4);
                 var pants = getRand(0,4);
                 var x = getRand(200, 600);
-                var y = getRand(100, 500);
-                var room = getRand(0,7);
+                var y = getRand(200, 400);
+                var room = getRand(0,7);//4
                 while(room == 0 || room == 2 || room == 6)
                 {
                     room = getRand(0,7);
                 }
                 if(i == 0) room = 4;
 
-                if(this.sprites.indexOf([hair, face, shirt, pants, room]) == -1)
+                if(this.sprites.indexOf([hair, face, shirt, pants]) == -1)
                 {
-                    this.sprites.push([hair, face, shirt, pants, room]);
+                    this.sprites.push([hair, face, shirt, pants]);
                     this.positions.push([x, y]);
+                    this.cRooms.push(room);
                 }
                 else
                 {
@@ -251,7 +253,7 @@
             //for(var i = 0; i >= 0; i--)
             {
                 var char = this.sprites[i];
-                if(char[4] == GameState.curRoom)
+                if(this.cRooms[i] == GameState.curRoom)
                 {
                     var pos = this.positions[i];
                     var x = pos[0];
