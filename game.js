@@ -35,6 +35,7 @@
         init: function()
         {
             Ctrl.init();
+            Room.init();
             Screen.init();
             CharacterSet.init();
         },
@@ -75,13 +76,14 @@
             ctx.fillRect(0, 0, Game.width, Game.height);
             ctx.restore();
 
+            Room.draw();
             Ctrl.draw();
             CharacterSet.draw();
         },
 
         update: function()
         {
-            var speed = 4;
+            var speed = 5;
 
             var player = CharacterSet.positions[0];
             if(player[0] != Ctrl.dest[0] || player[1] != Ctrl.dest[1])
@@ -103,6 +105,21 @@
                     CharacterSet.positions[0] = [Math.floor(player[0] - xMove), Math.floor(player[1] - yMove)];
                 }
             }
+
+            for(var j = 0; j < Room.rooms[Room.curRoom].doors.length; j++)
+            {
+                var dist = getDist(Room.rooms[Room.curRoom].doors[j][0], Room.rooms[Room.curRoom].doors[j][1], CharacterSet.positions[0][0] + 10, CharacterSet.positions[0][1] + 65);
+                console.log(dist);
+                if(dist < 20)
+                {
+                    var newX = Room.rooms[Room.curRoom].doors[j][3];
+                    var newY = Room.rooms[Room.curRoom].doors[j][4];
+                    Room.curRoom = Room.rooms[Room.curRoom].doors[j][2];
+                    CharacterSet.positions[0] = [newX, newY];
+                    Ctrl.dest = [newX, newY];
+                    break;
+                }
+            }
         }
     };
 
@@ -117,7 +134,7 @@
 
     var CharacterSet =
     {
-        cCount : 10,
+        cCount : 2,
         sprites : [],
         positions: [],
 
@@ -134,8 +151,8 @@
                 var face = getRand(0,4);
                 var shirt = getRand(0,4);
                 var pants = getRand(0,4);
-                var x = 100 + (i * 60);
-                var y = 100;
+                var x = 300 + (i * 60);
+                var y = 300;
 
                 if(this.sprites.indexOf([hair, face, shirt, pants]) == -1)
                 {
@@ -152,6 +169,7 @@
         draw: function()
         {
             for(var i = this.cCount - 1; i >= 0; i--)
+            //for(var i = 0; i >= 0; i--)
             {
                 var char = this.sprites[i];
                 var pos = this.positions[i];
@@ -166,10 +184,58 @@
         }
     };
 
+    var Room = 
+    {
+        curRoom : 0,
+        walls : [],
+        rooms : [],
+
+        init: function()
+        {
+            this.curRoom = 0;
+
+            this.walls = [
+                [150, 50, 650, 50],
+                [150, 550, 150, 50],
+                [150, 550, 650, 550],
+                [650, 550, 650, 50],
+            ];
+
+            this.rooms = [
+                {doors : [[400, 50, 1, 390, 455],[650, 300, 2, 180, 235],[400, 550, 3, 390, 15],[150, 300, 4, 600, 235]], boxes : []},
+                {doors : [[400, 550, 0, 390, 15]], boxes : []},
+                {doors : [[150, 300, 0, 600, 235]], boxes : []},
+                {doors : [[400, 50, 0, 390, 455]], boxes : []},
+                {doors : [[650, 300, 0, 180, 235]], boxes : []},
+            ];
+        },
+
+        draw: function()
+        {
+            for(var i = 0; i < 4; i++)
+            {        
+                var line = this.walls[i];    
+                ctx.beginPath();
+                ctx.strokeStyle = 'orange';
+                ctx.moveTo(line[0],line[1]);
+                ctx.lineTo(line[2],line[3]);
+                ctx.stroke();
+            }
+
+            var theRoom = this.rooms[this.curRoom];
+
+            for(var j = 0; j < theRoom.doors.length; j++)
+            {
+                var door = theRoom.doors[j];
+                drawCircle(door[0], door[1], 10);
+            }
+        },
+    };
+
     var Ctrl = 
     {
         init: function() {
-            this.dest = [0,0];
+            this.dest = [300,300];
             window.addEventListener('keydown', this.keyDown, true);
             window.addEventListener('keyup', this.keyUp, true);
             Game.canvas.addEventListener('mousedown', this.getMouseClick, true);
@@ -222,7 +288,7 @@
             x -= Game.canvas.offsetLeft;
             y -= Game.canvas.offsetTop;
 
-            Ctrl.dest = [x - 10, y - 65];
+            if(x >= 150 && x <= 650 && y >= 50 && y <= 550) Ctrl.dest = [x - 10, y - 65];
         },
 
         draw: function()
