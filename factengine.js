@@ -104,6 +104,7 @@ function random_in_range (min,max){
 // FACTS AND STUFF 
 var female_titles = ["Mistress","Miss","Duchess","Lady","Mrs.","Queen"];
 var male_titles = ["Duke","Lord","Master","Mister","Mr.","King"];
+var female_names = [];
 var first_names = ["Jerry","Terry","Mary","Gary","Larry","Harry","Barry","Cari","Dairy","Fairy","Kerry","Perry"];
 var last_names = ["Mathblaster2000", "Lover","Toronoto Flasher","Troxbox","Trox-money","Tinsel-trox","Crock-trox"];
 
