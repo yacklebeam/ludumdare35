@@ -1,14 +1,164 @@
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>-=> LD35 <=-</title>
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 9</title>
+	<script type="text/javascript" src="phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
 </head>
-<body style="text-align:center; background-color:#FFFFFF">
-    <canvas id="gamecanvas" width="800" height="600">
-        You need HTML5 to play this game now! Try Chrome or Firefox!
-    </canvas>
-    <script type="text/javascript" src="game.js"></script>
-</body>
+<body>
 
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
+
+function preload()
+{
+	game.load.image("character-parts", "res/ld35-chars.png");
+}
+
+var entities = [];
+var playerDest = [100,100];
+
+function create()
+{
+	for(var i = 0; i < 10; i++)
+	{
+		createRandomCharacter(100 + i * 50, 100 + i * 50);
+	}
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+	game.input.mouse.capture = true;
+}
+
+function update()
+{
+	if (game.input.mousePointer.isDown)
+	{
+		playerDest[0] = Math.floor(game.input.mousePointer.x);
+		playerDest[1] = Math.floor(game.input.mousePointer.y);	
+	}
+
+	var dist = getDist(playerDest[0], playerDest[1], entities[0].xpos, entities[0].ypos);
+	var speed = 5;
+
+    if(dist <= speed)
+    {
+    	entities[0].spr[0].x = playerDest[0] - 10;
+        entities[0].spr[0].y = playerDest[1] - 65;
+
+    	entities[0].spr[1].x = playerDest[0] - 10;
+        entities[0].spr[1].y = playerDest[1] - 60;
+            	
+        entities[0].spr[2].x = playerDest[0] - 10;
+        entities[0].spr[2].y = playerDest[1] - 40;
+        
+        entities[0].spr[3].x = playerDest[0] - 10;
+        entities[0].spr[3].y = playerDest[1] - 20;
+
+        entities[0].xpos = playerDest[0];
+        entities[0].ypos = playerDest[1];
+    }
+    else
+    {
+        var xDist = entities[0].xpos - playerDest[0];
+        var yDist = entities[0].ypos - playerDest[1];
+
+        var xMove = Math.round(speed * xDist / dist);
+        var yMove = Math.round(speed * yDist / dist);
+
+        for(var i = 0; i < 4; i++)
+        {
+        	entities[0].spr[i].x -= xMove;
+        	entities[0].spr[i].y -= yMove;
+        }
+
+        entities[0].xpos -= xMove;
+        entities[0].ypos -= yMove;
+    }
+
+    for(var s = 0; s < entities.length; s++)
+    {
+    	for(var k = 0; k < 4; k++)
+    	{
+	    	if(entities[s].spr[k].input.pointerOver())
+	    	{
+	    		//do mouseover event on character
+	    	}
+    	}
+    }
+}
+
+function render()
+{
+
+}
+
+function createRandomCharacter(x, y)
+{
+	var hair = getRand(0,4);
+	var face = getRand(0,4);
+	var shirt = getRand(0,4);
+	var pants = getRand(0,4);
+
+	while(inEntitiesList([hair,face,shirt,pants]))
+	{
+		hair = getRand(0,4);
+		face = getRand(0,4);
+		shirt = getRand(0,4);
+		pants = getRand(0,4);
+	}
+	createCharacter([hair, face, shirt, pants], x, y);
+}
+
+function createCharacter(parts, x, y)
+{
+	var newChar = [];
+	
+	var face = game.add.sprite(x - 10, y - 60, "character-parts");
+	face.crop(new Phaser.Rectangle(20 * parts[1], 20, 20, 20));
+	face.inputEnabled = true;
+	
+	var shirt = game.add.sprite(x - 10, y - 40, "character-parts");
+	shirt.crop(new Phaser.Rectangle(20 * parts[2], 40, 20, 20));
+	shirt.inputEnabled = true;
+
+	var pants = game.add.sprite(x - 10, y - 20, "character-parts");
+	pants.crop(new Phaser.Rectangle(20 * parts[3], 60, 20, 20));
+	pants.inputEnabled = true;
+
+	var hair = game.add.sprite(x - 10, y - 65, "character-parts");
+	hair.crop(new Phaser.Rectangle(20 * parts[0], 0, 20, 20));
+	hair.inputEnabled = true;
+
+	newChar = {spr: [hair, face, shirt, pants], xpos: x, ypos: y};
+	entities.push(newChar);
+}
+
+function inEntitiesList(ent)
+{
+	for(var i = 0; i < entities.length; i++)
+	{
+		if(entities[i].spr == ent) return true;
+	}
+	return false;
+}
+
+function getDist(x1, y1, x2, y2)
+{
+    var xd = x1 - x2;
+    var yd = y1 - y2;
+    return Math.sqrt(xd * xd + yd * yd);
+}
+
+function getRand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+</script>
+
+</body>
 </html>

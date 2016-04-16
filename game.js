@@ -91,16 +91,26 @@
             ];
 
             this.rooms = [
-                {},
-                {doors: [0,0,1,0], boxes: [], chars: []},
-                {},
-                {doors: [0,1,0,0], boxes: [], chars: []},
-                {doors: [1,1,1,1], boxes: [], chars: []},
-                {doors: [0,0,0,1], boxes: [], chars: []},
-                {},
-                {doors: [1,0,0,0], boxes: [], chars: []},
-                {},
+                {doors: [0,0,0,0], boxes: []},
+                {doors: [0,0,1,0], boxes: []},
+                {doors: [0,0,0,0], boxes: []},
+                {doors: [0,1,0,0], boxes: []},
+                {doors: [1,1,1,1], boxes: []},
+                {doors: [0,0,0,1], boxes: []},
+                {doors: [0,0,0,0], boxes: []},
+                {doors: [1,0,0,0], boxes: []},
+                {doors: [0,0,0,0], boxes: []},
             ];
+
+            for(var i = 0; i < this.rooms.length; i++)
+            {
+                for(var j = 0; j < 5; j++)
+                {
+                    var xRand = getRand(200, 600);
+                    var yRand = getRand(200, 400);
+                    this.rooms[i].boxes.push({x: xRand, y: yRand, inv: []});
+                }
+            }
         },
 
         draw: function()
@@ -123,6 +133,11 @@
                 {
                     drawCircle(this.possibleDoors[j][0], this.possibleDoors[j][1], 10);
                 }
+            }
+
+            for(var k = 0; k < theRoom.boxes.length; k++)
+            {
+                drawBox(theRoom.boxes[k].x, theRoom.boxes[k].y);
             }
         }
     };
@@ -152,42 +167,46 @@
         {
             var speed = 5;
 
-            var player = CharacterSet.positions[0];
-            if(player[0] != Ctrl.dest[0] || player[1] != Ctrl.dest[1])
+            for(var i = 0; i < CharacterSet.cCount; i++)
             {
-                var dist = getDist(player[0], player[1], Ctrl.dest[0], Ctrl.dest[1]);
-
-                if(dist <= speed)
+                if(i != 0) speed = 3;
+                var player = CharacterSet.positions[i];
+                if(player[i] != CharacterSet.cDests[i][0] || player[1] != CharacterSet.cDests[i][1])
                 {
-                    CharacterSet.positions[0] = Ctrl.dest;
-                }
-                else
-                {
-                    var xDist = player[0] - Ctrl.dest[0];
-                    var yDist = player[1] - Ctrl.dest[1];
+                    var dist = getDist(player[0], player[1], CharacterSet.cDests[i][0], CharacterSet.cDests[i][1]);
 
-                    var xMove = speed * xDist / dist;
-                    var yMove = speed * yDist / dist;
-
-                    CharacterSet.positions[0] = [Math.floor(player[0] - xMove), Math.floor(player[1] - yMove)];
-                }
-            }
-
-            for(var j = 0; j < 4; j++)
-            {
-                if(GameState.rooms[GameState.curRoom].doors[j] == 1)
-                {
-                    var dist = getDist(GameState.possibleDoors[j][0], GameState.possibleDoors[j][1], CharacterSet.positions[0][0] + 10, CharacterSet.positions[0][1] + 65);
-
-                    if(dist < 20)
+                    if(dist <= speed)
                     {
-                        var newX = GameState.possibleDoors[j][3];
-                        var newY = GameState.possibleDoors[j][4];
-                        GameState.curRoom += GameState.possibleDoors[j][2];
-                        CharacterSet.positions[0] = [newX, newY];
-                        Ctrl.dest = [newX, newY];
-                        CharacterSet.cRooms[0] = GameState.curRoom;
-                        break;
+                        CharacterSet.positions[i] = CharacterSet.cDests[i];
+                    }
+                    else
+                    {
+                        var xDist = player[0] - CharacterSet.cDests[i][0];
+                        var yDist = player[1] - CharacterSet.cDests[i][1];
+
+                        var xMove = speed * xDist / dist;
+                        var yMove = speed * yDist / dist;
+
+                        CharacterSet.positions[i] = [Math.floor(player[0] - xMove), Math.floor(player[1] - yMove)];
+                    }
+                }
+
+                for(var j = 0; j < 4; j++)
+                {
+                    if(GameState.rooms[GameState.curRoom].doors[j] == 1)
+                    {
+                        var dist = getDist(GameState.possibleDoors[j][0], GameState.possibleDoors[j][1], CharacterSet.positions[0][0] + 10, CharacterSet.positions[0][1] + 65);
+
+                        if(dist < 20)
+                        {
+                            var newX = GameState.possibleDoors[j][3];
+                            var newY = GameState.possibleDoors[j][4];
+                            GameState.curRoom += GameState.possibleDoors[j][2];
+                            CharacterSet.positions[i] = [newX, newY];
+                            CharacterSet.cDests[i] = [newX, newY];
+                            CharacterSet.cRooms[i] = GameState.curRoom;
+                            break;
+                        }
                     }
                 }
             }
@@ -209,6 +228,7 @@
         sprites : [],
         positions: [],
         cRooms: [],
+        cDests : [],
         selectedChar : 0,
 
         init: function()
@@ -233,11 +253,16 @@
                 }
                 if(i == 0) room = 4;
 
+                //temp
+                var xDest = getRand(200, 600);
+                var yDest = getRand(200, 400);
+
                 if(this.sprites.indexOf([hair, face, shirt, pants]) == -1)
                 {
                     this.sprites.push([hair, face, shirt, pants]);
                     this.positions.push([x, y]);
                     this.cRooms.push(room);
+                    this.cDests.push([xDest, yDest]);
                 }
                 else
                 {
@@ -318,11 +343,13 @@
                                 CharacterSet.positions[CharacterSet.selectedChar][1] + 30
                             ];
             }
+
+            CharacterSet.cDests[0] = Ctrl.dest;
         },
 
         draw: function()
         {
-            drawDestCursor(this.dest[0], this.dest[1] + 55);
+            drawDestCursor(CharacterSet.cDests[0][0], CharacterSet.cDests[0][1] + 55);
         }
     };
 
@@ -343,6 +370,11 @@
     function drawDestCursor(x, y)
     {
         ctx.drawImage(AssetLoader.ui, 0, 0, 20, 20, x, y, 20, 20);
+    }
+
+    function drawBox(x, y)
+    {
+        ctx.drawImage(AssetLoader.ui, 20, 0, 20, 20, x, y, 20, 20);
     }
 
     function getRand(min, max) {
