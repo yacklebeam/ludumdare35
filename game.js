@@ -34,6 +34,7 @@
 
         init: function()
         {
+            Ctrl.init();
             Screen.init();
             CharacterSet.init();
         },
@@ -66,6 +67,8 @@
 
         draw: function()
         {
+            this.update();
+
             ctx.save();
             ctx.clearRect(0, 0, Game.width, Game.height);
             ctx.fillStyle = '#000000';
@@ -73,6 +76,31 @@
             ctx.restore();
 
             CharacterSet.draw();
+        },
+
+        update: function()
+        {
+            var speed = 3;
+
+            if(Ctrl.up)
+            {
+                CharacterSet.positions[0][1] -= speed;
+            }
+
+            if(Ctrl.left)
+            {
+                CharacterSet.positions[0][0] -= speed;            
+            }
+
+            if(Ctrl.down)
+            {
+                CharacterSet.positions[0][1] += speed;
+            }
+
+            if(Ctrl.right)
+            {
+                CharacterSet.positions[0][0] += speed;
+            }
         }
     };
 
@@ -86,7 +114,8 @@
     var CharacterSet =
     {
         cCount : 10,
-        chars : [],
+        sprites : [],
+        positions: [],
 
         init: function()
         {
@@ -101,19 +130,29 @@
                 var face = getRand(0,4);
                 var shirt = getRand(0,4);
                 var pants = getRand(0,4);
+                var x = 100 + (i * 60);
+                var y = 100;
 
-                this.chars.push([hair, face, shirt, pants]);
+                if(this.sprites.indexOf([hair, face, shirt, pants]) == -1)
+                {
+                    this.sprites.push([hair, face, shirt, pants]);
+                    this.positions.push([x, y]);
+                }
+                else
+                {
+                    i--;
+                }
             }
         },
 
         draw: function()
         {
-            for(var i = 0; i < this.cCount; i++)
+            for(var i = this.cCount - 1; i >= 0; i--)
             {
-                var x = 100 + (i * 60);
-                var y = 100;
-
-                var char = this.chars[i];
+                var char = this.sprites[i];
+                var pos = this.positions[i];
+                var x = pos[0];
+                var y = pos[1];
 
                 drawImage(AssetLoader.cSprites, x, y + 45,  20, 20, char[3] * 20, 60,  20, 20);
                 drawImage(AssetLoader.cSprites, x, y + 25,  20, 20, char[2] * 20, 40,  20, 20);
@@ -121,6 +160,54 @@
                 drawImage(AssetLoader.cSprites, x, y,       20, 20, char[0] * 20, 0,   20, 20);
             }
         }
+    };
+
+    var Ctrl = 
+    {
+        init: function() {
+            window.addEventListener('keydown', this.keyDown, true);
+            window.addEventListener('keyup', this.keyUp, true);
+        },
+
+        keyDown: function(event) {
+            switch (event.keyCode) {
+                case 87://W
+                    Ctrl.up = true;
+                    break;
+                case 65://A
+                    Ctrl.left = true;
+                    break;
+                case 83://S
+                    Ctrl.down = true;
+                    break;
+                case 68://D
+                    Ctrl.right = true;
+                    break;
+                default:
+                    break;
+            }
+        },
+
+        keyUp: function(event) {
+            switch (event.keyCode) {
+                case 87://W
+                    Ctrl.up = false;
+                    break;
+                case 65://A
+                    Ctrl.left = false;
+                    break;
+                case 83://S
+                    Ctrl.down = false;
+                    break;
+                case 68://D
+                    Ctrl.right = false;
+                    break;
+                default:
+                    break;
+
+
+            }
+        },
     };
 
     function drawCircle(x, y, size)
