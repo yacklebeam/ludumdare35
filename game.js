@@ -9,7 +9,7 @@
             window.msRequestAnimationFrame ||
             function(callback)
             {
-                window.setTimeout(callback, 1000 / 60);
+                window.setTimeout(callback, 1000 / 30);
             };
     })();
 
@@ -76,13 +76,14 @@
             ctx.restore();
 
             CharacterSet.draw();
+            Ctrl.draw();
         },
 
         update: function()
         {
-            var speed = 3;
+            var speed = 4;
 
-            if(Ctrl.up)
+            /*if(Ctrl.up)
             {
                 CharacterSet.positions[0][1] -= speed;
             }
@@ -100,6 +101,27 @@
             if(Ctrl.right)
             {
                 CharacterSet.positions[0][0] += speed;
+            }*/
+
+            var player = CharacterSet.positions[0];
+            if(player[0] != Ctrl.dest[0] || player[1] != Ctrl.dest[1])
+            {
+                var dist = getDist(player[0], player[1], Ctrl.dest[0], Ctrl.dest[1]);
+
+                if(dist <= speed)
+                {
+                    CharacterSet.positions[0] = Ctrl.dest;
+                }
+                else
+                {
+                    var xDist = player[0] - Ctrl.dest[0];
+                    var yDist = player[1] - Ctrl.dest[1];
+
+                    var xMove = speed * xDist / dist;
+                    var yMove = speed * yDist / dist;
+
+                    CharacterSet.positions[0] = [Math.floor(player[0] - xMove), Math.floor(player[1] - yMove)];
+                }
             }
         }
     };
@@ -165,8 +187,10 @@
     var Ctrl = 
     {
         init: function() {
+            this.dest = [0,0];
             window.addEventListener('keydown', this.keyDown, true);
             window.addEventListener('keyup', this.keyUp, true);
+            Game.canvas.addEventListener('mousedown', this.getMouseClick, true);
         },
 
         keyDown: function(event) {
@@ -208,6 +232,21 @@
 
             }
         },
+
+        getMouseClick: function(event)
+        {
+            var x = event.x;
+            var y = event.y;
+            x -= Game.canvas.offsetLeft;
+            y -= Game.canvas.offsetTop;
+
+            Ctrl.dest = [x - 10, y - 65];
+        },
+
+        draw: function()
+        {
+            drawCircle(this.dest[0] + 10, this.dest[1] + 65, 5);
+        }
     };
 
     function drawCircle(x, y, size)
@@ -226,6 +265,13 @@
 
     function getRand(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getDist(x1, y1, x2, y2)
+    {
+        var xd = x1 - x2;
+        var yd = y1 - y2;
+        return Math.sqrt(xd * xd + yd * yd);
     }
 
     window.onload = function()
