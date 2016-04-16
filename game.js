@@ -75,33 +75,13 @@
             ctx.fillRect(0, 0, Game.width, Game.height);
             ctx.restore();
 
-            CharacterSet.draw();
             Ctrl.draw();
+            CharacterSet.draw();
         },
 
         update: function()
         {
             var speed = 4;
-
-            /*if(Ctrl.up)
-            {
-                CharacterSet.positions[0][1] -= speed;
-            }
-
-            if(Ctrl.left)
-            {
-                CharacterSet.positions[0][0] -= speed;            
-            }
-
-            if(Ctrl.down)
-            {
-                CharacterSet.positions[0][1] += speed;
-            }
-
-            if(Ctrl.right)
-            {
-                CharacterSet.positions[0][0] += speed;
-            }*/
 
             var player = CharacterSet.positions[0];
             if(player[0] != Ctrl.dest[0] || player[1] != Ctrl.dest[1])
@@ -129,7 +109,9 @@
     var AssetLoader = {
         loadAssets: function() {
             this.cSprites = new Image();
-            this.cSprites.src = 'res/ld35-chars.png';
+            this.cSprites.src = 'res/ld35-chars.png';            
+            this.ui = new Image();
+            this.ui.src = 'res/ld35-ui.png';
         }
     };
 
@@ -245,7 +227,7 @@
 
         draw: function()
         {
-            drawCircle(this.dest[0] + 10, this.dest[1] + 65, 5);
+            drawDestCursor(this.dest[0], this.dest[1] + 55);
         }
     };
 
@@ -261,6 +243,11 @@
     function drawImage(src, x, y, w, h, sx, sy, cw, ch)
     {
         ctx.drawImage(src, sx, sy, cw, ch, x, y, w, h);
+    }
+
+    function drawDestCursor(x, y)
+    {
+        ctx.drawImage(AssetLoader.ui, 0, 0, 20, 20, x, y, 20, 20);
     }
 
     function getRand(min, max) {
