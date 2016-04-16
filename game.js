@@ -26,7 +26,7 @@
         },
 
         init: function() {
-
+            Screen.init();
         },
 
         animate: function() {
@@ -36,12 +36,26 @@
 
         draw: function() {
             this.frameCount++;
+            Screen.draw();
             if (this.frameCount >= Number.MAX_VALUE - 1000) this.frameCount = 0;
         },
 
         runGame: function() {
             Game.init();
             Game.animate();
+        }
+    };
+
+    var Screen = {
+        init: function() {
+        },
+
+        draw: function() {
+            ctx.save();
+            ctx.clearRect(0, 0, Game.width, Game.height);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, Game.width, Game.height);
+            ctx.restore();
         }
     };
 
