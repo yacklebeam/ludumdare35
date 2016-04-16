@@ -19,17 +19,33 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', { preload: preload, crea
 function preload()
 {
 	game.load.image("character-parts", "res/ld35-chars.png");
+	game.load.image("ui-parts", "res/ld35-ui.png");
 }
 
 var entities = [];
 var playerDest = [100,100];
+var cursor;
+var selectedEntity = -1;
+var guests;
+var player;
 
 function create()
 {
+	guests = game.add.group();
+	cursor = game.add.sprite(0, 0, "ui-parts");
+	cursor.crop(new Phaser.Rectangle(0, 0, 20, 20));
+
 	for(var i = 0; i < 10; i++)
 	{
-		createRandomCharacter(100 + i * 50, 100 + i * 50);
+		entities.push(createRandomCharacter(100 + i * 50, 100 + i * 50));
 	}
+
+	for(var b = 0; b < 10; b++)
+	{
+		entities.push(createBox(getRand(100, 200), getRand(100, 200)));
+	}
+
+	player = createRandomCharacter(100, 600);
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 	game.input.mouse.capture = true;
 }
@@ -39,53 +55,68 @@ function update()
 	if (game.input.mousePointer.isDown)
 	{
 		playerDest[0] = Math.floor(game.input.mousePointer.x);
-		playerDest[1] = Math.floor(game.input.mousePointer.y);	
+		playerDest[1] = Math.floor(game.input.mousePointer.y);
+
+		cursor.x = playerDest[0] - 10;
+		cursor.y = playerDest[1] - 10;
+
+		if(selectedEntity >= 0)
+		{
+			playerDest[0] = Math.floor(entities[selectedEntity].xpos + 10);
+			playerDest[1] = Math.floor(entities[selectedEntity].ypos + 20);
+
+			cursor.x = playerDest[0] - 10;
+			cursor.y = playerDest[1] - 10;
+		}
 	}
 
-	var dist = getDist(playerDest[0], playerDest[1], entities[0].xpos, entities[0].ypos);
+	var dist = getDist(playerDest[0], playerDest[1], player.xpos, player.ypos);
 	var speed = 5;
 
     if(dist <= speed)
     {
-    	entities[0].spr[0].x = playerDest[0] - 10;
-        entities[0].spr[0].y = playerDest[1] - 65;
+    	player.spr[0].x = playerDest[0] - 10;
+        player.spr[0].y = playerDest[1] - 65;
 
-    	entities[0].spr[1].x = playerDest[0] - 10;
-        entities[0].spr[1].y = playerDest[1] - 60;
+    	player.spr[1].x = playerDest[0] - 10;
+        player.spr[1].y = playerDest[1] - 60;
             	
-        entities[0].spr[2].x = playerDest[0] - 10;
-        entities[0].spr[2].y = playerDest[1] - 40;
+        player.spr[2].x = playerDest[0] - 10;
+        player.spr[2].y = playerDest[1] - 40;
         
-        entities[0].spr[3].x = playerDest[0] - 10;
-        entities[0].spr[3].y = playerDest[1] - 20;
+        player.spr[3].x = playerDest[0] - 10;
+        player.spr[3].y = playerDest[1] - 20;
 
-        entities[0].xpos = playerDest[0];
-        entities[0].ypos = playerDest[1];
+        player.xpos = playerDest[0];
+        player.ypos = playerDest[1];
     }
     else
     {
-        var xDist = entities[0].xpos - playerDest[0];
-        var yDist = entities[0].ypos - playerDest[1];
+        var xDist = player.xpos - playerDest[0];
+        var yDist = player.ypos - playerDest[1];
 
         var xMove = Math.round(speed * xDist / dist);
         var yMove = Math.round(speed * yDist / dist);
 
         for(var i = 0; i < 4; i++)
         {
-        	entities[0].spr[i].x -= xMove;
-        	entities[0].spr[i].y -= yMove;
+        	player.spr[i].x -= xMove;
+        	player.spr[i].y -= yMove;
         }
 
-        entities[0].xpos -= xMove;
-        entities[0].ypos -= yMove;
+        player.xpos -= xMove;
+        player.ypos -= yMove;
     }
+
+   	selectedEntity = -1;
 
     for(var s = 0; s < entities.length; s++)
     {
-    	for(var k = 0; k < 4; k++)
+    	for(var k = 0; k < entities[s].spr.length; k++)
     	{
 	    	if(entities[s].spr[k].input.pointerOver())
 	    	{
+	    		selectedEntity = s;
 	    		//do mouseover event on character
 	    	}
     	}
@@ -111,7 +142,7 @@ function createRandomCharacter(x, y)
 		shirt = getRand(0,4);
 		pants = getRand(0,4);
 	}
-	createCharacter([hair, face, shirt, pants], x, y);
+	return createCharacter([hair, face, shirt, pants], x, y);
 }
 
 function createCharacter(parts, x, y)
@@ -135,7 +166,16 @@ function createCharacter(parts, x, y)
 	hair.inputEnabled = true;
 
 	newChar = {spr: [hair, face, shirt, pants], xpos: x, ypos: y};
-	entities.push(newChar);
+	return newChar;
+}
+
+function createBox(x, y)
+{
+	var box = game.add.sprite(x, y, "ui-parts");
+	box.crop(new Phaser.Rectangle(20, 0, 20, 20));
+	box.inputEnabled = true;
+	var newBox = {spr: [box], xpos: x, ypos: y};
+	return newBox;
 }
 
 function inEntitiesList(ent)
